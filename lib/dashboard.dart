@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:stack_overflow/questions.dart';
 
 class Dashboard extends StatelessWidget {
   List<String> subjects;
@@ -36,6 +37,13 @@ class Dashboard extends StatelessWidget {
                         )
                       ],
                     ),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  Questions(subject: subject)));
+                    },
                   ),
                 ));
           }),

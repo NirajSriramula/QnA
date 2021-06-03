@@ -34,9 +34,10 @@ class MyApp extends StatelessWidget {
           keylist = jsonData[i].keys.toList();
           for (j = 0; j < keylist.length; j++) {
             String slot = keylist[j];
-            if (notin(jsonData[i][slot].toString())) {
-              subjects.add(jsonData[i][slot].toString().substring(0, 5));
-              print(jsonData[i][slot].toString().substring(0, 5));
+            if (!subjects
+                .contains(jsonData[i][slot].toString().split("/")[0])) {
+              subjects.add(jsonData[i][slot].toString().split("/")[0]);
+              print(jsonData[i][slot].toString().split("/")[0]);
             }
           }
         }
@@ -178,10 +179,5 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  bool notin(jsonData) {
-    if()
-    return true;
   }
 }
