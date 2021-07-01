@@ -21,31 +21,23 @@ class Dashboard extends StatelessWidget {
           itemCount: subjects.length,
           itemBuilder: (context, index) {
             String subject = subjects[index];
-            return Padding(
-                padding: EdgeInsets.all(5.0),
-                child: Card(
-                  child: ListTile(
-                    title: Row(
-                      children: [
-                        SizedBox(
-                          width: size.width * 0.3 + 25,
-                          height: 90,
-                        ),
-                        Text(
-                          subject,
-                          style: TextStyle(fontSize: 24),
-                        )
-                      ],
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  Questions(subject: subject)));
-                    },
+            return Card(
+              child: ListTile(
+                contentPadding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                title: Center(
+                  child: Text(
+                    subject,
+                    style: TextStyle(fontSize: 24),
                   ),
-                ));
+                ),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Questions(subject: subject)));
+                },
+              ),
+            );
           }),
     );
   }
