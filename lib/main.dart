@@ -123,7 +123,7 @@ class _MyAppState extends State<MyApp> {
       var res = await http.get(
           "https://sdi-webserver.herokuapp.com/students/login",
           headers: {"usn": usn, "password": pass});
-      print(res.statusCode);
+      print(jsonDecode(res.body)['token']);
       gett();
     }
 
