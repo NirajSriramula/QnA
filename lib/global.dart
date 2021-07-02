@@ -11,9 +11,19 @@ void getSharedPreferenceInstance() async {
 }
 
 Future<Void> fetchToken(String usn, String password) async {
-  var res = await http.get("https://sdi-webserver.herokuapp.com/students/login",
-      headers: {"usn": usn, "password": password});
-  setToken(jsonDecode(res.body)['token']);
+  try {
+    var res = await http.get(
+        "https://sdi-webserver.herokuapp.com/students/login",
+        headers: {"usn": usn, "password": password});
+    if (res != null && res.body != null) {
+      setToken(jsonDecode(res.body)['token']);
+      setName(jsonDecode(res.body)['name']);
+    } else {
+      print('Facing error in fetching information');
+    }
+  } catch (e) {
+    print(e);
+  }
 }
 
 void setToken(String token) {
@@ -22,4 +32,13 @@ void setToken(String token) {
 
 String getToken() {
   return _sharedPreferences.getString('token');
+}
+
+//save Name
+void setName(String name) {
+  _sharedPreferences.setString('name', name);
+}
+
+String getName() {
+  _sharedPreferences.getString('name');
 }

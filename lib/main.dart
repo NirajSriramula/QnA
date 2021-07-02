@@ -121,7 +121,7 @@ class _MyAppState extends State<MyApp> {
     List list = ["8", "6", "4"];
     Size size = MediaQuery.of(context).size;
     Future<void> login() async {
-      fetchToken(usn, pass)
+      fetchToken(usn, pass);
       gett();
     }
 
