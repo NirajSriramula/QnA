@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:http/http.dart' as http;
+import 'package:stack_overflow/global.dart';
 import 'dashboard.dart';
 import 'package:direct_select/direct_select.dart';
 
@@ -120,10 +121,7 @@ class _MyAppState extends State<MyApp> {
     List list = ["8", "6", "4"];
     Size size = MediaQuery.of(context).size;
     Future<void> login() async {
-      var res = await http.get(
-          "https://sdi-webserver.herokuapp.com/students/login",
-          headers: {"usn": usn, "password": pass});
-      print(jsonDecode(res.body)['token']);
+      fetchToken(usn, pass)
       gett();
     }
 
