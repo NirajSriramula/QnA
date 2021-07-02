@@ -24,11 +24,9 @@ class Dashboard extends StatelessWidget {
             return Card(
               child: ListTile(
                 contentPadding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-                title: Center(
-                  child: Text(
-                    subject,
-                    style: TextStyle(fontSize: 24),
-                  ),
+                title: Text(
+                  subject,
+                  style: TextStyle(fontSize: 24),
                 ),
                 onTap: () {
                   Navigator.push(

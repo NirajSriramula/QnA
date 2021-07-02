@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 
 import 'answers.dart';
+import 'package:http/http.dart' as http;
 
 class Questions extends StatefulWidget {
   String subject;
   Questions({this.subject});
 
   @override
-  _QuestionsState createState() => _QuestionsState();
+  _QuestionsState createState() => _QuestionsState(subject);
 }
 
 class _QuestionsState extends State<Questions> {
+  String subject;
+  _QuestionsState(String subject) {
+    this.subject = subject;
+  }
   String new_question;
   int count = 1;
   @override
@@ -101,5 +106,11 @@ class _QuestionsState extends State<Questions> {
 
   void postQuestion(String question) {}
 
-  void getQuestions() {}
+  var res;
+
+  Future<void> getQuestions() async {
+    res = await http.get(
+        "https://sdi-webserver.herokuapp.com/api/stackOverFlow/questions",
+        headers: {"branch": "cse", "subject": subject, "year": "3"});
+  }
 }

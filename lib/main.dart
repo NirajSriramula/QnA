@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:http/http.dart' as http;
 import 'dashboard.dart';
+import 'package:direct_select/direct_select.dart';
 
 void main() {
   runApp(MyApps());
@@ -18,29 +19,92 @@ class MyApps extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  String valueChoose;
+  @override
   Widget build(BuildContext context) {
     var res;
+
     Future<void> gett() async {
       res = await http.get("https://sdi-webserver.herokuapp.com/api/timetable",
-          headers: {"semester": "6", "section": "C"});
-
+          headers: {"semester": valueChoose, "section": "A"});
+      print(res.statusCode);
       if (res.statusCode == 200) {
         var jsonData = json.decode(res.body);
         List<String> keylist;
         List<String> subjects = List<String>();
         int i, j;
-        for (i = 0; i < 6; i++) {
+        //print(jsonData.toString());
+        for (i = 0; i < jsonData.length; i++) {
           keylist = jsonData[i].keys.toList();
+          //print(keylist.length);
           for (j = 0; j < keylist.length; j++) {
-            String slot = keylist[j];
-            if (!subjects
-                .contains(jsonData[i][slot].toString().split("/")[0])) {
-              subjects.add(jsonData[i][slot].toString().split("/")[0]);
-              print(jsonData[i][slot].toString().split("/")[0]);
+            String substr = jsonData[i][keylist[j]].toString();
+            String subject = substr.split("/")[0];
+            if (valueChoose == "6") {
+              if (substr.contains("-")) {
+                for (int k = 0; k < substr.split("/").length; k++) {
+                  String lab = substr
+                      .split("/")[k]
+                      .split("-")[1]
+                      .replaceAll(" ", "")
+                      .replaceAll("	", "");
+                  lab = lab.substring(0, lab.length - 3) +
+                      " " +
+                      lab.substring(lab.length - 3);
+                  if (!subjects.contains(lab)) {
+                    subjects.add(lab);
+                  }
+                }
+              }
+            }
+            if (substr.contains("LAB") && !substr.contains("-")) {
+              for (int k = 0; k < substr.split("/").length; k++) {
+                String lab = substr.split("/")[k].substring(3);
+                lab = lab.replaceAll(" ", "").replaceAll("	", "");
+                lab = lab.substring(0, lab.length - 3) +
+                    " " +
+                    lab.substring(lab.length - 3);
+
+                if (!subjects.contains(lab)) {
+                  subjects.add(lab);
+                }
+              }
+            } else if (!subjects.contains(subject) &&
+                !substr.contains("-") &&
+                !substr.contains("LAB")) {
+              subjects.add(subject);
             }
           }
         }
+        print(subjects);
+        // previous method..
+        /*for (i = 0; i < 6; i++) {
+          keylist = jsonData[i].keys.toList();
+          for (j = 0; j < keylist.length; j++) {
+            String slot = keylist[j];
+            String sub = jsonData[i][slot].toString();
+            if (sub.contains("-") && !sub.contains("|")) {
+              for (int k = 0; k < sub.split("/").length; k++) {
+                String lab = sub.split("/")[k].split("-")[0];
+                if (!subjects.contains(lab)) {
+                  subjects.add(lab);
+                }
+              }
+            }
+            if (!subjects.contains(sub.split("/")[0]) &&
+                !sub.contains("-") &&
+                !sub.contains("|")) {
+              subjects.add(sub.split("/")[0]);
+              print(sub.split("/")[0]);
+            }
+          }
+        }*/
         //  print(outDB[0]);
         Navigator.push(
             context,
@@ -50,11 +114,15 @@ class MyApp extends StatelessWidget {
       ;
     }
 
+    var inputController1 = TextEditingController();
+    var inputController2 = TextEditingController();
+    String usn, pass;
+    List list = ["8", "6", "4"];
     Size size = MediaQuery.of(context).size;
     Future<void> login() async {
       var res = await http.get(
-          "https://sdi-webserver.herokuapp.com/api/students/login",
-          headers: {"usn": "1BI18CS144", "password": "password"});
+          "https://sdi-webserver.herokuapp.com/students/login",
+          headers: {"usn": usn, "password": pass});
       print(res.statusCode);
       gett();
     }
@@ -76,71 +144,82 @@ class MyApp extends StatelessWidget {
             Colors.blue[400]
           ])),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(
-                height: size.height * 0.1,
-              ),
               Container(
                 alignment: Alignment.topLeft,
-                padding: EdgeInsets.all(20),
+                padding: EdgeInsets.fromLTRB(20, 0, 0, 20),
                 child: Text(
                   "Welcome BITan",
                   style: TextStyle(color: Colors.white, fontSize: 37),
                 ),
               ),
               SizedBox(
-                height: 20,
+                height: 10,
               ),
               Container(
-                  height: size.height * 0.9 - 103,
-                  width: size.width,
+                  width: size.width - 20,
                   decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(36),
-                          topRight: Radius.circular(36))),
+                      borderRadius: BorderRadius.all(Radius.circular(30))),
                   child: Column(
                     children: [
-                      SizedBox(
-                        height: 36,
-                      ),
                       Container(
                         padding: EdgeInsets.all(20),
                         child: TextField(
+                          controller: inputController1,
+                          maxLength: 10,
                           decoration: InputDecoration(
                               hintText: "Enter USN",
                               hintStyle: TextStyle(fontSize: 13),
-                              labelText: "USN",
                               labelStyle:
                                   TextStyle(fontSize: 24, color: Colors.black),
                               border: OutlineInputBorder()),
                         ),
                       ),
-                      SizedBox(
-                        height: 16,
-                      ),
                       Container(
                         padding: EdgeInsets.all(20),
                         child: TextField(
+                          obscureText: true,
+                          controller: inputController2,
                           decoration: InputDecoration(
                             hintText: "Enter Password",
                             hintStyle: TextStyle(fontSize: 13),
-                            labelText: "Password",
                             labelStyle:
                                 TextStyle(fontSize: 24, color: Colors.black),
                             border: OutlineInputBorder(),
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: 36,
+                      Row(
+                        children: [
+                          DropdownButton(
+                              hint: Text("Semester"),
+                              value: valueChoose,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  valueChoose = newValue;
+                                });
+                              },
+                              items: list.map((valueItem) {
+                                return DropdownMenuItem(
+                                    value: valueItem, child: Text(valueItem));
+                              }).toList()),
+                        ],
                       ),
                       Container(
                         child: Center(
                           child: RaisedButton(
                               padding: EdgeInsets.symmetric(
                                   vertical: 12, horizontal: 60),
-                              onPressed: login,
+                              onPressed: () {
+                                setState(() {
+                                  usn = inputController1.text;
+                                  pass = inputController2.text;
+                                });
+
+                                login();
+                              },
                               color: Colors.blue[900],
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
@@ -158,7 +237,7 @@ class MyApp extends StatelessWidget {
                         ),
                       ),
                       SizedBox(
-                        height: 36,
+                        height: 16,
                       ),
                       RichText(
                         text: TextSpan(children: [
@@ -170,7 +249,7 @@ class MyApp extends StatelessWidget {
                         ]),
                       ),
                       SizedBox(
-                        height: 36,
+                        height: 20,
                       ),
                     ],
                   )),
