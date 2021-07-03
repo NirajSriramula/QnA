@@ -3,6 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stack_overflow/global.dart';
 import 'package:stack_overflow/main.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stack_overflow/global.dart';
+import 'package:stack_overflow/main.dart';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:http/http.dart' as http;
+import 'package:stack_overflow/global.dart';
+import 'dashboard.dart';
+import 'package:direct_select/direct_select.dart';
 
 import 'answers.dart';
 
@@ -33,6 +45,7 @@ class _AnswersState extends State<Answers> {
 
   String subject;
   String question, usn, token;
+  List<String> answers;
   String new_answer;
   @override
   Widget build(BuildContext context) {
@@ -54,7 +67,7 @@ class _AnswersState extends State<Answers> {
         centerTitle: true,
       ),
       body: ListView.builder(
-          itemCount: count,
+          itemCount: count, //answers.length,
           itemBuilder: (context, index) {
             return Padding(
                 padding: EdgeInsets.all(5.0),
@@ -64,22 +77,15 @@ class _AnswersState extends State<Answers> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          " widget.answer",
-                          style: TextStyle(fontSize: 18),
+                          "wdwas", //answers[index],
+                          style: TextStyle(fontSize: 24),
                         ),
                         Column(
                           children: [
                             Row(
                               children: [
-                                Text("credits"),
-                                Icon(Icons.arrow_upward, size: 32),
-                              ],
-                            ),
-                            SizedBox(height: 20),
-                            Row(
-                              children: [
-                                Text("demerit"),
-                                Icon(Icons.arrow_downward, size: 32),
+                                Text("credits"), //credits[index,]
+                                Icon(Icons.arrow_upward, size: 26),
                               ],
                             ),
                           ],
@@ -139,9 +145,10 @@ class _AnswersState extends State<Answers> {
 
   var res;
   Future<void> postAnswer(String new_answer) async {
-    res = await http.post("https://sdi-webserver.herokuapp.com",
-        body: new_answer, headers: {"usn": usn, "token": token});
-    getAnswers();
+    res = await http.post(
+        "https://sdi-webserver.herokuapp.com/api/stackOverFlow/addAnswer/:questionId",
+        headers: {"usn": usn, "token": token, "answer": new_answer});
+    print(res.statusCode);
   }
 
   Future<void> getAnswers() async {
@@ -149,5 +156,13 @@ class _AnswersState extends State<Answers> {
         "https://sdi-webserver.herokuapp.com/stackOverFlow/getQuestion/:questionId",
         headers: {"usn": usn, "token": token, "question": question});
     print(res.statusCode);
+    var jsonData = json.decode(res.body);
+    int i, j;
+    print(jsonData["questions"].length);
+    for (i = 0; i < jsonData["questions"].length; i++) {
+      answers.add(jsonData["questions"][i]["question"]);
+    }
+    print(answers);
+    setState(() {});
   }
 }
