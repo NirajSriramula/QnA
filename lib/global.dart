@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 SharedPreferences _sharedPreferences;
-
 void getSharedPreferenceInstance() async {
   _sharedPreferences = await SharedPreferences.getInstance();
 }
@@ -13,13 +12,17 @@ void getSharedPreferenceInstance() async {
 Future<Void> fetchToken(String usn, String password) async {
   var res = await http.get("https://sdi-webserver.herokuapp.com/students/login",
       headers: {"usn": usn, "password": password});
-  setToken(jsonDecode(res.body)['token']);
+  String token = jsonDecode(res.body)['token'].toString();
+  setToken(token, usn);
 }
 
-void setToken(String token) {
+Future<void> setToken(String token, String usno) async {
+  _sharedPreferences = await SharedPreferences.getInstance();
+  _sharedPreferences.setString("usn", usno);
   _sharedPreferences.setString('token', token);
 }
 
-String getToken() {
-  return _sharedPreferences.getString('token');
+Future<String> getToken() async {
+  final _preferences = await SharedPreferences.getInstance();
+  return _preferences.getString("token");
 }

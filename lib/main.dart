@@ -27,13 +27,20 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String valueChoose;
+
+  String usn, pass;
   @override
   Widget build(BuildContext context) {
     var res;
 
     Future<void> gett() async {
-      res = await http.get("https://sdi-webserver.herokuapp.com/api/timetable",
-          headers: {"semester": valueChoose, "section": "A"});
+      res = await http
+          .get("https://sdi-webserver.herokuapp.com/api/timetable", headers: {
+        "semester": valueChoose,
+        "section": "A",
+        "token": getToken().toString(),
+        "usn": usn
+      });
       print(res.statusCode);
       if (res.statusCode == 200) {
         var jsonData = json.decode(res.body);
@@ -117,12 +124,23 @@ class _MyAppState extends State<MyApp> {
 
     var inputController1 = TextEditingController();
     var inputController2 = TextEditingController();
-    String usn, pass;
     List list = ["8", "6", "4"];
     Size size = MediaQuery.of(context).size;
     Future<void> login() async {
-      fetchToken(usn, pass)
-      gett();
+      fetchToken(usn, pass);
+      List<String> subjects = [];
+      subjects.add("SS & CD");
+      subjects.add("CGV");
+      subjects.add("WT");
+      subjects.add("PE");
+      subjects.add("OE");
+      subjects.add("CGV LAB");
+      subjects.add("SS & OS LAB");
+      subjects.add("MAD LAB");
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Dashboard(subjects: subjects)));
     }
 
     void forgotPassword() {

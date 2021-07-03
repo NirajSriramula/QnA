@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stack_overflow/global.dart';
+import 'package:stack_overflow/main.dart';
+
+import 'answers.dart';
+
+import 'package:http/http.dart' as http;
 
 class Answers extends StatefulWidget {
   String question;
@@ -9,6 +17,18 @@ class Answers extends StatefulWidget {
 }
 
 class _AnswersState extends State<Answers> {
+  @override
+  void initState() {
+    super.initState();
+    getAnswers();
+  }
+
+  String subject;
+  Future<String> getPreff() async {
+    final _preferences = await SharedPreferences.getInstance();
+    return _preferences.getString("usn");
+  }
+
   String new_answer;
   @override
   Widget build(BuildContext context) {
@@ -113,5 +133,20 @@ class _AnswersState extends State<Answers> {
     );
   }
 
-  void postAnswer(String new_answer) {}
+  var res;
+  Future<void> postAnswer(String new_answer) async {
+    String usn = getPreff().toString();
+    res = await http.post("https://sdi-webserver.herokuapp.com",
+        body: new_answer,
+        headers: {"usn": usn, "token": getToken().toString()});
+    getAnswers();
+  }
+
+  Future<void> getAnswers() async {
+    String usn = getPreff().toString();
+    res = await http.get(
+        "https://sdi-webserver.herokuapp.com/stackOverFlow/getQuestion/:questionId",
+        headers: {"usn": usn, "token": getToken().toString()});
+    print(res.statusCode);
+  }
 }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stack_overflow/global.dart';
+import 'package:stack_overflow/main.dart';
 
 import 'answers.dart';
+
 import 'package:http/http.dart' as http;
 
 class Questions extends StatefulWidget {
@@ -12,12 +16,32 @@ class Questions extends StatefulWidget {
 }
 
 class _QuestionsState extends State<Questions> {
+  @override
+  void initState() {
+    super.initState();
+    getQuestions();
+  }
+
   String subject;
+  String _usn;
+  Future<String> getPreff() async {
+    final _preferences = await SharedPreferences.getInstance();
+    final String usn = await _preferences.getString("usn");
+    print(usn);
+    setState(() => _usn = usn);
+  }
+
+  Future<String> getToken() async {
+    final _preferences = await SharedPreferences.getInstance();
+    return _preferences.getString("token");
+  }
+
   _QuestionsState(String subject) {
     this.subject = subject;
   }
   String new_question;
   int count = 1;
+  List<String> questions = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,13 +128,29 @@ class _QuestionsState extends State<Questions> {
     );
   }
 
-  void postQuestion(String question) {}
-
   var res;
 
+  Future<void> postQuestion(String question) async {
+    String usn = _usn;
+    print(usn);
+    res = await http.post(
+        "https://sdi-webserver.herokuapp.com/api/stackOverFlow/addQuestion",
+        body: question,
+        headers: {"usn": usn, "token": getToken().toString()});
+    print(res.statusCode);
+    getQuestions();
+  }
+
   Future<void> getQuestions() async {
+    String usn = _usn;
     res = await http.get(
         "https://sdi-webserver.herokuapp.com/api/stackOverFlow/questions",
-        headers: {"branch": "cse", "subject": subject, "year": "3"});
+        headers: {
+          "branch": "cse",
+          "subject": subject,
+          "year": "3",
+          "usn": usn,
+          "token": getToken().toString()
+        });
   }
 }
