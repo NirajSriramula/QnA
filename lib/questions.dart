@@ -9,10 +9,12 @@ import 'package:http/http.dart' as http;
 
 class Questions extends StatefulWidget {
   String subject;
-  Questions({this.subject});
+  String token;
+  String univsn;
+  Questions({this.subject, this.token, this.univsn});
 
   @override
-  _QuestionsState createState() => _QuestionsState(subject);
+  _QuestionsState createState() => _QuestionsState(subject, token, univsn);
 }
 
 class _QuestionsState extends State<Questions> {
@@ -23,7 +25,9 @@ class _QuestionsState extends State<Questions> {
   }
 
   String subject;
+  String token;
   String _usn;
+  String univsn;
   Future<String> getPreff() async {
     final _preferences = await SharedPreferences.getInstance();
     final String usn = await _preferences.getString("usn");
@@ -36,8 +40,10 @@ class _QuestionsState extends State<Questions> {
     return _preferences.getString("token");
   }
 
-  _QuestionsState(String subject) {
+  _QuestionsState(String subject, String token, String univsn) {
     this.subject = subject;
+    this.token = token;
+    this.univsn = univsn;
   }
   String new_question;
   int count = 1;
@@ -82,8 +88,11 @@ class _QuestionsState extends State<Questions> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  Answers(question: new_question)));
+                              builder: (context) => Answers(
+                                    question: new_question,
+                                    usn: univsn,
+                                    token: token,
+                                  )));
                     },
                   ),
                 ));
@@ -131,26 +140,26 @@ class _QuestionsState extends State<Questions> {
   var res;
 
   Future<void> postQuestion(String question) async {
-    String usn = _usn;
-    print(usn);
     res = await http.post(
         "https://sdi-webserver.herokuapp.com/api/stackOverFlow/addQuestion",
-        body: question,
-        headers: {"usn": usn, "token": getToken().toString()});
+        headers: {"usn": univsn, "token": token, "question": question});
     print(res.statusCode);
     getQuestions();
   }
 
   Future<void> getQuestions() async {
     String usn = _usn;
+    print(token + "\n");
+    print(univsn);
     res = await http.get(
         "https://sdi-webserver.herokuapp.com/api/stackOverFlow/questions",
         headers: {
           "branch": "cse",
           "subject": subject,
           "year": "3",
-          "usn": usn,
-          "token": getToken().toString()
+          "usn": univsn,
+          "token": token
         });
+    print(res.statusCode);
   }
 }

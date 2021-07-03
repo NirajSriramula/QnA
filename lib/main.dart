@@ -126,9 +126,14 @@ class _MyAppState extends State<MyApp> {
     var inputController1 = TextEditingController();
     var inputController2 = TextEditingController();
     List list = ["8", "6", "4"];
+    String token;
+    String getTokens() {
+      return token;
+    }
+
     Size size = MediaQuery.of(context).size;
     Future<void> login() async {
-      fetchToken(usn, pass);
+      token = await fetchToken(usn, pass);
       List<String> subjects = [];
       subjects.add("SS & CD");
       subjects.add("CGV");
@@ -141,7 +146,8 @@ class _MyAppState extends State<MyApp> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => Dashboard(subjects: subjects)));
+              builder: (context) =>
+                  Dashboard(subjects: subjects, token: token, usn: usn)));
     }
 
     void forgotPassword() {

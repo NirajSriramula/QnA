@@ -6,7 +6,9 @@ import 'package:stack_overflow/questions.dart';
 
 class Dashboard extends StatelessWidget {
   List<String> subjects;
-  Dashboard({this.subjects});
+  String token;
+  String usn;
+  Dashboard({this.subjects, this.token, this.usn});
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -32,7 +34,8 @@ class Dashboard extends StatelessWidget {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => Questions(subject: subject)));
+                          builder: (context) => Questions(
+                              subject: subject, token: token, univsn: usn)));
                 },
               ),
             );

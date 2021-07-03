@@ -9,11 +9,12 @@ void getSharedPreferenceInstance() async {
   _sharedPreferences = await SharedPreferences.getInstance();
 }
 
-Future<Void> fetchToken(String usn, String password) async {
+Future<String> fetchToken(String usn, String password) async {
   var res = await http.get("https://sdi-webserver.herokuapp.com/students/login",
       headers: {"usn": usn, "password": password});
-  String token = jsonDecode(res.body)['token'].toString();
-  setToken(token, usn);
+  var token = jsonDecode(res.body)['token'];
+  return token;
+  //setToken(token, usn);
 }
 
 Future<void> setToken(String token, String usno) async {

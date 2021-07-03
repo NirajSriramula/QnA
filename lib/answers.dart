@@ -10,13 +10,21 @@ import 'package:http/http.dart' as http;
 
 class Answers extends StatefulWidget {
   String question;
-  Answers({this.question});
+  String token;
+  String usn;
+  Answers({this.question, this.usn, this.token});
 
   @override
-  _AnswersState createState() => _AnswersState();
+  _AnswersState createState() => _AnswersState(question, usn, token);
 }
 
 class _AnswersState extends State<Answers> {
+  _AnswersState(String question, String usn, String token) {
+    this.question = question;
+    this.usn = usn;
+    this.token = token;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -24,11 +32,7 @@ class _AnswersState extends State<Answers> {
   }
 
   String subject;
-  Future<String> getPreff() async {
-    final _preferences = await SharedPreferences.getInstance();
-    return _preferences.getString("usn");
-  }
-
+  String question, usn, token;
   String new_answer;
   @override
   Widget build(BuildContext context) {
@@ -135,18 +139,15 @@ class _AnswersState extends State<Answers> {
 
   var res;
   Future<void> postAnswer(String new_answer) async {
-    String usn = getPreff().toString();
     res = await http.post("https://sdi-webserver.herokuapp.com",
-        body: new_answer,
-        headers: {"usn": usn, "token": getToken().toString()});
+        body: new_answer, headers: {"usn": usn, "token": token});
     getAnswers();
   }
 
   Future<void> getAnswers() async {
-    String usn = getPreff().toString();
     res = await http.get(
         "https://sdi-webserver.herokuapp.com/stackOverFlow/getQuestion/:questionId",
-        headers: {"usn": usn, "token": getToken().toString()});
+        headers: {"usn": usn, "token": token, "question": question});
     print(res.statusCode);
   }
 }
