@@ -34,13 +34,14 @@ class _MyAppState extends State<MyApp> {
     var res;
 
     Future<void> gett() async {
-      res = await http
-          .get("https://sdi-webserver.herokuapp.com/api/timetable", headers: {
-        "semester": valueChoose,
-        "section": "A",
-        "token": getToken().toString(),
-        "usn": usn
-      });
+      String token = await getToken();
+      res = await http.get("https://sdi-webserver.herokuapp.com/api/timetable",
+          headers: {
+            "semester": valueChoose,
+            "section": "A",
+            "token": token,
+            "usn": usn
+          });
       print(res.statusCode);
       if (res.statusCode == 200) {
         var jsonData = json.decode(res.body);
