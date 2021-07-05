@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stack_overflow/global.dart';
 import 'package:stack_overflow/main.dart';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:http/http.dart' as http;
+import 'package:stack_overflow/global.dart';
+import 'dashboard.dart';
+import 'package:direct_select/direct_select.dart';
 
 import 'answers.dart';
 
@@ -21,20 +29,11 @@ class _QuestionsState extends State<Questions> {
   @override
   void initState() {
     super.initState();
-    getQuestions();
   }
 
   String subject;
   String token;
-  String _usn;
   String univsn;
-  Future<String> getPreff() async {
-    final _preferences = await SharedPreferences.getInstance();
-    final String usn = await _preferences.getString("usn");
-    print(usn);
-    setState(() => _usn = usn);
-  }
-
   Future<String> getToken() async {
     final _preferences = await SharedPreferences.getInstance();
     return _preferences.getString("token");
@@ -46,10 +45,15 @@ class _QuestionsState extends State<Questions> {
     this.univsn = univsn;
   }
   String new_question;
-  int count = 1;
+  int count = 0;
+  var jsonData;
   List<String> questions = [];
   @override
   Widget build(BuildContext context) {
+    if (count < 1) {
+      getQuestions();
+      count++;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text("Questions"),
@@ -67,7 +71,7 @@ class _QuestionsState extends State<Questions> {
         centerTitle: true,
       ),
       body: ListView.builder(
-          itemCount: count,
+          itemCount: questions.length,
           itemBuilder: (context, index) {
             return Padding(
                 padding: EdgeInsets.all(5.0),
@@ -79,7 +83,7 @@ class _QuestionsState extends State<Questions> {
                           height: 90,
                         ),
                         Text(
-                          widget.subject,
+                          questions[index],
                           style: TextStyle(fontSize: 18),
                         )
                       ],
@@ -89,7 +93,7 @@ class _QuestionsState extends State<Questions> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => Answers(
-                                    question: new_question,
+                                    question: jsonData["questions"][index],
                                     usn: univsn,
                                     token: token,
                                   )));
@@ -142,13 +146,21 @@ class _QuestionsState extends State<Questions> {
   Future<void> postQuestion(String question) async {
     res = await http.post(
         "https://sdi-webserver.herokuapp.com/api/stackOverFlow/addQuestion",
-        headers: {"usn": univsn, "token": token, "question": question});
+        headers: {
+          "usn": univsn,
+          "token": token,
+          "question": question,
+          "branch": "cse",
+          "subject": subject,
+          "year": "3",
+        });
     print(res.statusCode);
-    getQuestions();
+    count = 0;
+    questions.clear();
+    setState(() {});
   }
 
   Future<void> getQuestions() async {
-    String usn = _usn;
     print(token + "\n");
     print(univsn);
     res = await http.get(
@@ -160,6 +172,14 @@ class _QuestionsState extends State<Questions> {
           "usn": univsn,
           "token": token
         });
-    print(res.statusCode);
+    jsonData = json.decode(res.body);
+    List<String> keylist;
+    int i, j;
+    print(jsonData["questions"].length);
+    for (i = 0; i < jsonData["questions"].length; i++) {
+      questions.add(jsonData["questions"][i]["question"]);
+    }
+    print(questions);
+    setState(() {});
   }
 }

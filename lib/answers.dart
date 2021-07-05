@@ -21,7 +21,7 @@ import 'answers.dart';
 import 'package:http/http.dart' as http;
 
 class Answers extends StatefulWidget {
-  String question;
+  var question;
   String token;
   String usn;
   Answers({this.question, this.usn, this.token});
@@ -31,7 +31,7 @@ class Answers extends StatefulWidget {
 }
 
 class _AnswersState extends State<Answers> {
-  _AnswersState(String question, String usn, String token) {
+  _AnswersState(var question, String usn, String token) {
     this.question = question;
     this.usn = usn;
     this.token = token;
@@ -40,16 +40,20 @@ class _AnswersState extends State<Answers> {
   @override
   void initState() {
     super.initState();
-    getAnswers();
   }
 
   String subject;
-  String question, usn, token;
+  var question;
+  String usn, token;
   List<String> answers;
   String new_answer;
+  int count = 0;
   @override
   Widget build(BuildContext context) {
-    int count = 2;
+    if (count < 1) {
+      getAnswers();
+      count++;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text("Answers"),
@@ -77,19 +81,18 @@ class _AnswersState extends State<Answers> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "wdwas", //answers[index],
+                          "GP", //answers[index],
                           style: TextStyle(fontSize: 24),
                         ),
-                        Column(
-                          children: [
-                            Row(
-                              children: [
-                                Text("credits"), //credits[index,]
-                                Icon(Icons.arrow_upward, size: 26),
-                              ],
-                            ),
-                          ],
-                        )
+                        GestureDetector(
+                          child: Row(
+                            children: [
+                              Text("credits"), //credits[index,]
+                              Icon(Icons.arrow_upward, size: 26),
+                            ],
+                          ),
+                          onTap: () {},
+                        ),
                       ],
                     ),
                     onTap: () {
@@ -146,22 +149,21 @@ class _AnswersState extends State<Answers> {
   var res;
   Future<void> postAnswer(String new_answer) async {
     res = await http.post(
-        "https://sdi-webserver.herokuapp.com/api/stackOverFlow/addAnswer/:questionId",
+        "https://sdi-webserver.herokuapp.com/api/stackOverFlow/addAnswer/" +
+            question["_id"],
         headers: {"usn": usn, "token": token, "answer": new_answer});
     print(res.statusCode);
+    count = 0;
+    setState(() {});
+  }
+
+  Future<void> getupVote() async {
+    //connect the upvote to backend
+    setState(() {});
   }
 
   Future<void> getAnswers() async {
-    res = await http.get(
-        "https://sdi-webserver.herokuapp.com/stackOverFlow/getQuestion/:questionId",
-        headers: {"usn": usn, "token": token, "question": question});
-    print(res.statusCode);
-    var jsonData = json.decode(res.body);
-    int i, j;
-    print(jsonData["questions"].length);
-    for (i = 0; i < jsonData["questions"].length; i++) {
-      answers.add(jsonData["questions"][i]["question"]);
-    }
+    print(question["answer"]);
     print(answers);
     setState(() {});
   }
